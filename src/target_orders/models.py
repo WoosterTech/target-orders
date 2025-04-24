@@ -1,10 +1,15 @@
 import datetime as dt
 import re
 from decimal import Decimal
-from typing import Self
+from typing import TYPE_CHECKING, Self
 
 from bs4 import BeautifulSoup, Tag
 from pydantic import BaseModel, HttpUrl
+
+from target_orders.utilities.bases import SimpleListRoot
+
+if TYPE_CHECKING:
+    from playwright.sync_api import ElementHandle
 
 
 class ElementNotFoundError(Exception):
@@ -122,3 +127,10 @@ class Order(TargetBaseModel):
             except ElementNotFoundError as e:
                 print(f"Error parsing item: {e}")
         return items
+
+
+class Orders(SimpleListRoot[Order]):
+    @classmethod
+    def parse_elements(cls, elements: "list[ElementHandle]") -> Self:
+        orders = [Order.parse_html(element.inner_html()) for element in elements]
+        return cls(root=orders)
