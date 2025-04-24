@@ -1,0 +1,29 @@
+[project]
+name = "target-orders"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [{ name = "Karl Wooster", email = "karl@woostertech.com" }]
+requires-python = ">=3.9,<3.13"
+dependencies = [
+    "beautifulsoup4>=4.13.4",
+    "playwright>=1.51.0",
+    "pydantic>=2.11.3",
+    "rich>=14.0.0",
+]
+
+[project.scripts]
+target-orders = "target_orders:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "commitizen>=4.6.0",
+    "deptry>=0.23.0",
+    "pre-commit>=4.2.0",
+    "pyright>=1.1.399",
+    "ruff>=0.11.6",
+]
