@@ -1,8 +1,11 @@
+import contextlib
 import functools
 import time
 from pathlib import Path
 
-from playwright.sync_api import sync_playwright
+from playwright._impl._errors import Error
+from playwright.sync_api import Browser, sync_playwright
+from playwright.sync_api._generated import BrowserContext, Page
 from pydantic import AnyHttpUrl, BaseModel
 from rich.console import Console
 from rich.progress import track
@@ -34,6 +37,15 @@ login_cookies_path = Path("target_login.json")
 console = Console()
 
 
+def _make_page(
+    browser: Browser, storage_state: Path | None = None
+) -> tuple[BrowserContext, Page]:
+    browser_context = browser.new_context(storage_state=storage_state)
+    page = browser_context.new_page()
+
+    return browser_context, page
+
+
 def get_orders(
     cookies_path: Path | None = None, *, loading_delay: int = 5, debug: bool = False
 ) -> Orders:
@@ -51,23 +63,19 @@ def get_orders(
         browser = p.chromium.launch(headless=False)
         if cookies_path and cookies_path.exists():
             console.print("Loading cookies from file...")
-            context = browser.new_context(storage_state=cookies_path)
+            context, page = _make_page(browser, storage_state=cookies_path)
         else:
             console.print("No cookies found, starting a new session...")
-            context = browser.new_context()
-            # Wait for the user to log in manually
+            context, page = _make_page(browser)
+            page.goto(target_urls.get_login_url())
             console.print("Log in manually and then press Enter here...")
             console.input()
-
-        page = context.new_page()
-
-        # Go to Target login page
-        page.goto(target_urls.get_login_url())
 
         console.print("Logged in, now going to purchase history...")
 
         # Go to Purchase History
-        page.goto(target_urls.get_orders_url())
+        with contextlib.suppress(Error):
+            page.goto(target_urls.get_orders_url())
 
         # Wait for the page to load
         for _ in track(
@@ -97,7 +105,9 @@ def get_orders(
 
 
 if __name__ == "__main__":
-    console.print("Starting Target Orders...")
+    console.print("[bold cyan]Starting Target Orders...[/]")
     orders = get_orders(cookies_path=login_cookies_path, debug=True)
-    console.print(orders)
-    console.print("Done!")
+    console.print("[bold green]Orders:[/]")
+    for idx, order in enumerate(orders, start=1):
+        console.print(f"{idx}: {order.order_number}")
+    console.print("\n[bold magenta]Done![/]")
