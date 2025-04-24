@@ -11,6 +11,7 @@ dependencies = [
     "pydantic>=2.11.3",
     "rich>=14.0.0",
 ]
+license = "MIT"
 
 [project.scripts]
 target-orders = "target_orders:main"
