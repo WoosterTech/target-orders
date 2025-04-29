@@ -4,8 +4,9 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "Karl Wooster", email = "karl@woostertech.com" }]
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.11,<3.14"
 dependencies = [
+    "attrmagic",
     "beautifulsoup4>=4.13.4",
     "playwright>=1.51.0",
     "pydantic>=2.11.3",
@@ -14,7 +15,12 @@ dependencies = [
 license = "MIT"
 
 [project.scripts]
-target-orders = "target_orders:main"
+target-orders = "target_orders.cli:app"
+
+[project.optional-dependencies]
+cli = [
+    "typer>=0.15.3",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -28,6 +34,19 @@ dev = [
     "pyright>=1.1.399",
     "ruff>=0.11.6",
 ]
+test = [
+    "pytest>=8.3.5",
+    "pytest-cov>=6.1.1",
+    "pytest-sugar>=1.0.0",
+    "tox>=4.25.0",
+]
 
 [tool.pyright]
 typeCheckingMode = "strict"
+
+[tool.uv.sources]
+attrmagic = { git = "https://github.com/WoosterTech/AttrMagic.git" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

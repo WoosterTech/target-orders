@@ -1,6 +1,7 @@
 import contextlib
 import functools
 import time
+from os import PathLike
 from pathlib import Path
 
 from playwright._impl._errors import Error
@@ -44,6 +45,29 @@ def _make_page(
     page = browser_context.new_page()
 
     return browser_context, page
+
+
+def parse_orders_from_html(html: str | Path, *, debug: bool = False) -> Orders:
+    """Parse orders from HTML.
+
+    Args:
+        html (str | PathLike): HTML string or path to HTML file.
+        debug (bool): If True, debug information will be printed.
+
+    Returns:
+        Orders: A list of orders.
+    """
+    if isinstance(html, PathLike):
+        html = Path(html).read_text(encoding="utf-8")
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=not debug)
+        context = browser.new_context()
+        page = context.new_page()
+        page.set_content(html)
+        orders_div = page.query_selector_all("div[data-test='order-details-link']")
+
+    return Orders.parse_elements(orders_div)
 
 
 def get_orders(
@@ -106,8 +130,15 @@ def get_orders(
 
 if __name__ == "__main__":
     console.print("[bold cyan]Starting Target Orders...[/]")
-    orders = get_orders(cookies_path=login_cookies_path, debug=True)
-    console.print("[bold green]Orders:[/]")
-    for idx, order in enumerate(orders, start=1):
-        console.print(f"{idx}: {order.order_number}")
-    console.print("\n[bold magenta]Done![/]")
+    # orders = get_orders(cookies_path=login_cookies_path, debug=True)
+    orders_html_path = Path("output/orders.html")
+    if not orders_html_path.exists():
+        console.print("[red]Orders HTML file not found![/]")
+        exit(1)
+    orders_str = orders_html_path.read_text(encoding="utf-8")
+    orders = Orders.parse_html(orders_str)
+    console.print(orders)
+    # console.print("[bold green]Orders:[/]")
+    # for idx, order in enumerate(orders, start=1):
+    #     console.print(f"{idx}: {order.order_number}")
+    # console.print("\n[bold magenta]Done![/]")
