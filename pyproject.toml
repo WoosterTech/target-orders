@@ -1,6 +1,6 @@
 [project]
 name = "target-orders"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "Karl Wooster", email = "karl@woostertech.com" }]
@@ -18,13 +18,26 @@ license = "MIT"
 target-orders = "target_orders.cli:app"
 
 [project.optional-dependencies]
-cli = [
-    "typer>=0.15.3",
-]
+cli = ["typer>=0.15.3"]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/target_orders/_version.py"
+
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+tag_format = "$version"
+version_scheme = "pep440"
+version_provider = "scm"
+update_changelog_on_bump = true
+major_version_zero = true
 
 [dependency-groups]
 dev = [

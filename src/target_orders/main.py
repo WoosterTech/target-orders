@@ -4,9 +4,7 @@ import time
 from os import PathLike
 from pathlib import Path
 
-from playwright._impl._errors import Error
-from playwright.sync_api import Browser, sync_playwright
-from playwright.sync_api._generated import BrowserContext, Page
+from playwright.sync_api import Browser, BrowserContext, Error, Page, sync_playwright
 from pydantic import AnyHttpUrl, BaseModel
 from rich.console import Console
 from rich.progress import track
@@ -126,19 +124,3 @@ def get_orders(
         browser.close()
 
     return orders
-
-
-if __name__ == "__main__":
-    console.print("[bold cyan]Starting Target Orders...[/]")
-    # orders = get_orders(cookies_path=login_cookies_path, debug=True)
-    orders_html_path = Path("output/orders.html")
-    if not orders_html_path.exists():
-        console.print("[red]Orders HTML file not found![/]")
-        exit(1)
-    orders_str = orders_html_path.read_text(encoding="utf-8")
-    orders = Orders.parse_html(orders_str)
-    console.print(orders)
-    # console.print("[bold green]Orders:[/]")
-    # for idx, order in enumerate(orders, start=1):
-    #     console.print(f"{idx}: {order.order_number}")
-    # console.print("\n[bold magenta]Done![/]")

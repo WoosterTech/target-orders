@@ -8,5 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
-target_login.json
+*login*.json
 output/
+src/target_orders/_version.py
